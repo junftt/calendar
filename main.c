@@ -1,8 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
-#define key_left 68;
-#define key_right 67;
+
+#include <termios.h>
+#include <unistd.h>
+
+int getch(void)
+{
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
+}
 
 //leap year?
 int isleapyear(int year)
@@ -266,14 +279,14 @@ void keyboardEvent(int month_num, int year, int month_1[6][7], int month_2[6][7]
     {
 	switch(getch())
 	{
-	    case 'key_right':
+	    case 'd':
                 if(month_num<27)
                 {
                     month_num+=9;
                     generateCalendar(month_num,year,month_1);
                     generateCalendar(month_num+3,year,month_2);
                     generateCalendar(month_num+6,year,month_3);                    
-                    system("cls");
+                    system("clear");
                     drawCalendar(month_num, year, month_1, month_2, month_3);
                 }else {
                     month_num = 0;
@@ -281,18 +294,18 @@ void keyboardEvent(int month_num, int year, int month_1[6][7], int month_2[6][7]
                     generateCalendar(month_num,year,month_1);
                     generateCalendar(month_num+3,year,month_2);
                     generateCalendar(month_num+6,year,month_3); 
-                    system("cls");
+                    system("clear");
                     drawCalendar(month_num, year, month_1, month_2, month_3);
                 }
 		break;
-            case 'key_left':
+            case 'a':
                 if(month_num>=9)
                 {
                     month_num-=9;
                     generateCalendar(month_num,year,month_1);
                     generateCalendar(month_num+3,year,month_2);
                     generateCalendar(month_num+6,year,month_3); 
-                    system("cls");
+                    system("clear");
                     drawCalendar(month_num, year, month_1, month_2, month_3);
                 }else {
                     month_num = 27;
@@ -300,7 +313,7 @@ void keyboardEvent(int month_num, int year, int month_1[6][7], int month_2[6][7]
                     generateCalendar(month_num,year,month_1);
                     generateCalendar(month_num+3,year,month_2);
                     generateCalendar(month_num+6,year,month_3); 
-                    system("cls");
+                    system("clear");
                     drawCalendar(month_num, year, month_1, month_2, month_3);
                 }                
 	}
