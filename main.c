@@ -31,290 +31,338 @@ int HowmanyDay(int month_num, int year)
 {
     switch(month_num)
     {
-        case 0:
+        case 1:
             return 31;
-        case 3:
+        case 2:
             if(isleapyear(year))
                 return 29;
             else
                 return 28;
+        case 3:
+            return 31;
+        case 4:
+            return 30;
+        case 5:
+            return 31;
         case 6:
+            return 30;
+        case 7:
+            return 31;
+        case 8:
             return 31;
         case 9:
             return 30;
+        case 10:
+            return 31;
+        case 11:
+            return 30;
         case 12:
-            return 31;
-        case 15:
-            return 30;
-        case 18:
-            return 31;
-        case 21:
-            return 31;
-        case 24:
-            return 30;
-        case 27:
-            return 31;
-        case 30:
-            return 30;
-        case 33:
             return 31;    
     }           
 }
 
 //calculate the lap between two different months in one year
-int calculatelap(int tomonth, int toyear)
+int calculatelap(int to_month, int to_year)
 {
-    int fromyear = 2018;
-    int fromi = 27;
-    int count = 0;
-    //count year's lap
-    if(toyear - fromyear > 0)
+    #define KNOWN_YEAR 2018
+    #define KNOWN_MONTH 10
+    #define KNOWN_DATE 1
+    #define KNOW_WEEK_DAY 1
+    int distance = 0;
+
+    if(to_year - KNOWN_YEAR > 0)
     {
-        count+=93;//the days left by 2018
-        for(int i = 0; i < toyear - fromyear - 1; ++i)
+        distance+=(HowmanyDay(KNOWN_MONTH,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH+1,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH+2,KNOWN_YEAR)+1);//the days left by 2018
+        for(int i = 0; i < to_year - KNOWN_YEAR - 1; ++i)
         {
-            if(isleapyear(fromyear + i + 1))
-                count+=366;
+            if(isleapyear(KNOWN_YEAR + i + 1))
+                distance+=366;
             else
-                count+=365;
+                distance+=365;
         }
-        for(int j = 0; j < tomonth+3; j+=3)
+        for(int j = 1; j < to_month; ++j)
         {
-            count+=HowmanyDay(j,toyear);
+            distance+=HowmanyDay(j,to_year);
         }
-        return count;
-    } else if (toyear - fromyear == 0){
-        if(tomonth>fromi)
+        return distance; 
+    } else if (to_year - KNOWN_YEAR == 0){
+        if(to_month>KNOWN_MONTH)
         {
-            count+=32;//the day left by Oct
-            for(int i = 0; i < tomonth - fromi; i+=3)
+            distance+=(HowmanyDay(KNOWN_MONTH,KNOWN_YEAR)+1);//the day left by Oct
+            for(int i = 1; i < to_month - KNOWN_MONTH; ++i)
             {
-                count+=HowmanyDay(fromi + i + 3,toyear);
+                    distance+=HowmanyDay(KNOWN_MONTH + i,to_year);
             }
-            return count;
-        } else if(tomonth==fromi){
+            return distance;
+        } else if(to_month==KNOWN_MONTH){
             return 6;
         }else{
-            count+=6;//the day went through by Oct
-            for(int i = 0; i < fromi - tomonth; i+=3)
+            distance+=6;//the day went through by Oct
+            for(int i = 1; i < KNOWN_MONTH - to_month + 1; ++i)
             {
-                count+=HowmanyDay(fromi - i - 3,toyear);
+                distance+=HowmanyDay(KNOWN_MONTH - i,to_year);
             }
-            return count;
+            return distance;
         }
-    } else if (toyear - fromyear < 0){
-        count+=279;//the days went through by 2018
-        for(int i = 0; i < fromyear - toyear - 1; ++i)
+    }  else if (to_year - KNOWN_YEAR < 0){
+        distance+=(HowmanyDay(KNOWN_MONTH-1,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-2,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-3,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-4,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-5,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-6,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-7,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-8,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH-9,KNOWN_YEAR)+6);;//the days went through by 2018
+        for(int i = 0; i < KNOWN_YEAR - to_year - 1; ++i)
         {
-            if(isleapyear(fromyear - i - 1))
-                count+=366;
+            if(isleapyear(KNOWN_YEAR - i - 1))
+                distance+=366;
             else
-                count+=365;
+                distance+=365;
         }
-        for(int j = 0; j < 33-tomonth+3; j+=3)
+        for(int j = 0; j < 12-to_month+1; ++j)
         {
-            count+=HowmanyDay(33 - j,toyear);
+            distance+=HowmanyDay(12 - j,to_year);
         }
-        return count;
+        return distance;
     }
 }
 
 //determine the first day is which week
 //base a certain date(Oct/1/2018 Mon)
-int WhichdaytoWhichweek(int month_num, int year)
+int determineTheFirstDayIsWhichWeek(int to_month, int to_year)
 {
-    if ((year>2018)||(year==2018&&month_num>27)){
-
-        int a = 7 - (HowmanyDay(month_num, year) - (calculatelap(month_num,year)%7))%7;//turn the last day be the first day
-        if(a == 7)
-        {
-            return 0;
-        } else {
-            return a;
-        }        
-    } else {
-        int a = 7-calculatelap(month_num,year)%7;
-        if(a == 7)
-        {
-            return 0;
-        } else {
-            return a;
-        }
-    }
-}
-
-//generate calendar as array form
-void generateCalendar(int month_num, int year, int month_array[6][7])
-{
-    int row = 0;
-    int column= WhichdaytoWhichweek(month_num,year);
-    int howmanyDay = HowmanyDay(month_num,year);
-    int dec = -1;
-    int dec_lv2;
-    int row_lv2;
-    int column_lv2;
-    if((year==2018&&month_num == 27)) {
-        month_array[0][0] = 0;
-        for(int j = 0; j<howmanyDay; ++j)
-        {
-            ++dec;
-            month_array[row][column + dec] = j+1;
-            if(column + dec == 6)
-            {
-                column = 0;
-                dec = -1;
-                ++row;
-            }
-        }
-        dec_lv2 = dec;
-        row_lv2 = row;
-        column_lv2 = column;
-        for(int m = 0; m< (5-row_lv2)*7+(6-column_lv2+dec_lv2); ++m)
-        {
-            ++dec;
-            month_array[row][column + dec] = 0;
-            if(column + dec == 6)
-            {
-                if(row == 5)
-                {
-                    return;
-                }
-                column = 0;
-                dec = -1;
-                ++row;
-            }       
-        }
-    } else {
-        for(int i = 0; i<column; ++i)
-        {
-            ++dec;
-            month_array[0][column-dec-1] = 0;
-        }
-        dec=-1;
-        for(int j = 0; j<howmanyDay; ++j)
-        {
-            ++dec;
-            month_array[row][column + dec] = j+1;
-            if(column + dec == 6)
-            {
-                column = 0;
-                dec = -1;
-                ++row;
-            }
-        }
-        dec_lv2 = dec;
-        row_lv2 = row;
-        column_lv2 = column;
-        for(int m = 0; m< (5-row_lv2)*7+(6-column_lv2+dec_lv2); ++m)
-        {
-            ++dec;
-            month_array[row][column + dec] = 0;
-            if(column + dec == 6)
-            {
-                if(row == 5)
-                {
-                    return;
-                }
-                column = 0;
-                dec = -1;
-                ++row;
-            }       
-        }       
-    } 
-}
-
-//
-void drawCalendar(int month_num, int year, int month_1[6][7], int month_2[6][7], int month_3[6][7])
-{
-    int row = 6;
-    int column = 7;
-    char month_string[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-    printf("%41c%d%c\n\n",'[', year, ']');
-    printf("%11c%c%c%29c%c%c%29c%c%c\n", month_string[month_num], month_string[month_num+1], month_string[month_num+2], month_string[month_num+3], month_string[month_num+4], month_string[month_num+5], month_string[month_num+6], month_string[month_num+7], month_string[month_num+8]);
-    printf("Su||Mo||Tu||We||Th||Fr||Sa     Su||Mo||Tu||We||Th||Fr||Sa     Su||Mo||Tu||We||Th||Fr||Sa\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    
-    for (int j = 0; j<row; ++j)
+    int a;
+    if((to_year  > KNOWN_YEAR) || (to_year == KNOWN_YEAR&&to_month > KNOWN_MONTH))
     {
-        for(int k = 0; k<column; ++k)
-        {
-            if(month_1[j][k] == 0)
-            {
-            printf("%-4c",' ');
-            }else {
-                printf("%-4d",month_1[j][k]);
-            }
-        }
-        printf("   ");//3 space
-        for(int k = 0; k<column; ++k)
-        {
-            if(month_2[j][k] == 0)
-            {
-            printf("%-4c",' ');
-            }else {
-                printf("%-4d",month_2[j][k]);
-            }
-        }
-        printf("   ");
-        for(int k = 0; k<column; ++k)
-        {
-            if(month_3[j][k] == 0)
-            {
-            printf("%-4c",' ');
-            }else {
-                printf("%-4d",month_3[j][k]);
-            }
-        }
-        printf("\n");
+        a = calculatelap(to_month,to_year)%7;
+        return a;
+    } else{
+        a = 7-calculatelap(to_month,to_year)%7;
+        return a;
     }
-    printf("\npress key 'a' or key 'd' to change calendar\n");
-
 }
 
 //
-void keyboardEvent(int month_num, int year, int month_1[6][7], int month_2[6][7], int month_3[6][7])
+void drawCalendar(int month_num, int year)
+{
+    int month_1_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeek(month_num,year);
+    int month_2_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeek(month_num+1,year);
+    int month_3_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeek(month_num+2,year);
+    int month_1_HowmanyDay = HowmanyDay(month_num,year);
+    int month_2_HowmanyDay = HowmanyDay(month_num+1,year);
+    int month_3_HowmanyDay = HowmanyDay(month_num+2,year);
+    int month_1_left;
+    int month_2_left;
+    int month_3_left;
+    
+    char month_string[][4]={"NAN","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    char week_string[][3]={"Su","Mo","Tu","We","Th","Fr","Sa"};
+    
+    printf("%41c%d%c\n\n",'[', year, ']');
+    
+    printf("%10c",' ');
+    printf(month_string[month_num+1]);
+    printf("%28c",' ');
+    printf(month_string[month_num+2]);
+    printf("%28c",' ');
+    printf(month_string[month_num+3]);
+    printf("\n");
+    
+    for(int i = 0;i<21;++i)
+    {
+        if(i == 6||i == 13)
+        {
+            printf(week_string[i%7]);
+            printf("     ");
+        } else if(i == 20){
+            printf(week_string[i%7]);
+            printf("\n");
+        }else {
+        printf(week_string[i%7]);
+        printf("--");
+        }
+    }
+    
+    for(int i = 0; i<88; ++i)
+    {
+        printf("~");
+    }
+    printf("\n");
+
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6)
+        {
+            if(i >= month_1_FirstDay_WhichWeek)
+                printf("%-4d",i - month_1_FirstDay_WhichWeek + 1);
+            else
+                printf("%-4c",' ');
+            month_1_left = i - month_1_FirstDay_WhichWeek + 1;
+        } else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14){
+            if(i - 8 >= month_2_FirstDay_WhichWeek)
+                printf("%-4d",i - 8 - month_2_FirstDay_WhichWeek + 1);
+            else
+                printf("%-4c",' ');
+            month_2_left = i - 8 - month_2_FirstDay_WhichWeek + 1;
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22){
+            if(i - 16 >= month_3_FirstDay_WhichWeek)
+                printf("%-4d",i - 16 - month_3_FirstDay_WhichWeek + 1);
+            else
+                printf("%-4c",' ');
+            month_3_left = i - 16 - month_3_FirstDay_WhichWeek + 1;
+        }
+    }
+    
+    printf("\n");
+    
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6)
+        {
+            ++month_1_left;
+            printf("%-4d",month_1_left);
+        } else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14){
+            ++month_2_left;
+            printf("%-4d",month_2_left);
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22){
+            ++month_3_left;
+            printf("%-4d",month_3_left);
+        }
+    }
+  
+    printf("\n");    
+    
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6)
+        {
+            ++month_1_left;
+            printf("%-4d",month_1_left);
+        } else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14){
+            ++month_2_left;
+            printf("%-4d",month_2_left);
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22){
+            ++month_3_left;
+            printf("%-4d",month_3_left);
+        }
+    }
+    
+    printf("\n");
+
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6)
+        {
+            ++month_1_left;
+            printf("%-4d",month_1_left);
+        } else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14){
+            ++month_2_left;
+            printf("%-4d",month_2_left);
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22){
+            ++month_3_left;
+            printf("%-4d",month_3_left);
+        }
+    }
+    
+    printf("\n");
+    
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6 && month_1_left <month_1_HowmanyDay)
+        {
+            ++month_1_left;
+            printf("%-4d",month_1_left);
+        } else if(i<=6 && month_1_left >= month_1_HowmanyDay){
+            printf("%-4c",' ');
+        }else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14 && month_2_left < month_2_HowmanyDay){
+            ++month_2_left;
+            printf("%-4d",month_2_left);
+        } else if(i>=8&&i<=14 && month_2_left >= month_2_HowmanyDay){
+            printf("%-4c",' ');
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22 && month_3_left < month_3_HowmanyDay){
+            ++month_3_left;
+            printf("%-4d",month_3_left);
+        } else if(i>=16&&i<=22 && month_3_left >= month_3_HowmanyDay){
+            printf("%-4c",' ');
+        }
+    }
+
+    printf("\n");
+
+    for(int i = 0; i<23; ++i)
+    {
+        if(i<=6 && month_1_left <month_1_HowmanyDay)
+        {
+            ++month_1_left;
+            printf("%-4d",month_1_left);
+        } else if(i<=6 && month_1_left >= month_1_HowmanyDay){
+            printf("%-4c",' ');
+        }else if(i==7){
+            printf("   ");
+        } else if(i>=8&&i<=14 && month_2_left < month_2_HowmanyDay){
+            ++month_2_left;
+            printf("%-4d",month_2_left);
+        } else if(i>=8&&i<=14 && month_2_left >= month_2_HowmanyDay){
+            printf("%-4c",' ');
+        } else if(i==15){
+            printf("   ");
+        } else if(i>=16&&i<=22 && month_3_left < month_3_HowmanyDay){
+            ++month_3_left;
+            printf("%-4d",month_3_left);
+        } else if(i>=16&&i<=22 && month_3_left >= month_3_HowmanyDay){
+            printf("%-4c",' ');
+        }
+    }
+    
+    printf("\n");
+    
+}
+
+//
+void keyboardEvent(int month_num, int year)
 {
     while(1)
     {
 	switch(getch())
 	{
 	    case 'd':
-                if(month_num<27)
+                if(month_num<10)
                 {
-                    month_num+=9;
-                    generateCalendar(month_num,year,month_1);
-                    generateCalendar(month_num+3,year,month_2);
-                    generateCalendar(month_num+6,year,month_3);                    
+                    month_num+=3;                  
                     system("clear");
-                    drawCalendar(month_num, year, month_1, month_2, month_3);
+                    drawCalendar(month_num, year);
                 }else {
-                    month_num = 0;
+                    month_num = 1;
                     year+=1;
-                    generateCalendar(month_num,year,month_1);
-                    generateCalendar(month_num+3,year,month_2);
-                    generateCalendar(month_num+6,year,month_3); 
                     system("clear");
-                    drawCalendar(month_num, year, month_1, month_2, month_3);
+                    drawCalendar(month_num, year);
                 }
 		break;
             case 'a':
-                if(month_num>=9)
+                if(month_num>=4)
                 {
-                    month_num-=9;
-                    generateCalendar(month_num,year,month_1);
-                    generateCalendar(month_num+3,year,month_2);
-                    generateCalendar(month_num+6,year,month_3); 
+                    month_num-=3;
                     system("clear");
-                    drawCalendar(month_num, year, month_1, month_2, month_3);
+                    drawCalendar(month_num, year);
                 }else {
-                    month_num = 27;
+                    month_num = 10;
                     year-=1;
-                    generateCalendar(month_num,year,month_1);
-                    generateCalendar(month_num+3,year,month_2);
-                    generateCalendar(month_num+6,year,month_3); 
                     system("clear");
-                    drawCalendar(month_num, year, month_1, month_2, month_3);
+                    drawCalendar(month_num, year);
                 }                
 	}
     }
@@ -323,20 +371,11 @@ void keyboardEvent(int month_num, int year, int month_1[6][7], int month_2[6][7]
 int main()
 {
     //variable
-    int row = 6;
-    int column = 7;
     int year = 2018;
-    int month_num = 27;
-    int month_1[row][column];
-    int month_2[row][column];
-    int month_3[row][column];
-    //generateCalendar
-    generateCalendar(month_num,year,month_1);
-    generateCalendar(month_num+3,year,month_2);
-    generateCalendar(month_num+6,year,month_3);    
+    int month_num = 10;
     //
-    drawCalendar(month_num, year, month_1, month_2, month_3);
+    drawCalendar(month_num, year);
     //cant use define
-    keyboardEvent(month_num, year, month_1, month_2, month_3);
+    keyboardEvent(month_num, year);
     return 0;
 }
