@@ -27,7 +27,7 @@ int isleapyear(int year)
 }
 
 //calculate number of days of a month
-int HowmanyDay(int month_num, int year)
+int HowmanyDay(int month_num, int year)//数组
 {
     switch(month_num)
     {
@@ -57,12 +57,12 @@ int HowmanyDay(int month_num, int year)
         case 11:
             return 30;
         case 12:
-            return 31;    
-    }           
+            return 31;
+    }
 }
 
 //calculate the lap between two different months in one year
-int calculatelap(int to_month, int to_year)
+int calculatelap(int to_month, int to_year)//命名calculateLapFromKnownDay//别加进特殊逻辑，要统一//传10/1返回1，9/1返回6
 {
     #define KNOWN_YEAR 2018
     #define KNOWN_MONTH 10
@@ -70,7 +70,7 @@ int calculatelap(int to_month, int to_year)
     #define KNOW_WEEK_DAY 1
     int distance = 0;
 
-    if(to_year - KNOWN_YEAR > 0)
+    if(to_year - KNOWN_YEAR > 0)//最后一行return
     {
         distance+=(HowmanyDay(KNOWN_MONTH,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH+1,KNOWN_YEAR)+HowmanyDay(KNOWN_MONTH+2,KNOWN_YEAR)+1);//the days left by 2018
         for(int i = 0; i < to_year - KNOWN_YEAR - 1; ++i)
@@ -123,7 +123,7 @@ int calculatelap(int to_month, int to_year)
 
 //determine the first day is which week
 //base a certain date(Oct/1/2018 Mon)
-int determineTheFirstDayIsWhichWeek(int to_month, int to_year)
+int determineTheFirstDayIsWhichWeek(int to_month, int to_year)//weekday
 {
     int a;
     if((to_year  > KNOWN_YEAR) || (to_year == KNOWN_YEAR&&to_month > KNOWN_MONTH))
@@ -161,7 +161,7 @@ void drawCalendar(int month_num, int year)
     printf("%28c",' ');
     printf(month_string[month_num+3]);
     printf("\n");
-    
+    //常量
     for(int i = 0;i<21;++i)
     {
         if(i == 6||i == 13)
@@ -332,7 +332,7 @@ void drawCalendar(int month_num, int year)
     
 }
 
-//
+//q退出
 void keyboardEvent(int month_num, int year)
 {
     while(1)
