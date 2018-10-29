@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <conio.h>
 
-#define KNOWN_YEAR 2019
+#define KNOWN_YEAR 2018
 #define KNOWN_MONTH 10
 #define KNOWN_DATE 1
-#define KNOW_WEEK_DAY 2
+#define KNOW_WEEK_DAY 1
 
 int isleapyear(int year)
 {
@@ -32,7 +32,7 @@ int howManyDay(int month_num, int year)
 
 //calculate the lap between two different months in one year
 //base on a certain date(Oct/1/2018 Mon)
-int calculatelap(int to_month, int to_year)
+int calculateDistance(int to_month, int to_year)
 {
     int distance = 0;
     if(to_year - KNOWN_YEAR > 0)
@@ -51,7 +51,6 @@ int calculatelap(int to_month, int to_year)
         {
             distance+=howManyDay(j,to_year);
         }
-        distance += KNOW_WEEK_DAY;
     } else if (to_year - KNOWN_YEAR == 0){
         if(to_month>KNOWN_MONTH)
         {
@@ -60,15 +59,13 @@ int calculatelap(int to_month, int to_year)
             {
                 distance+=howManyDay(KNOWN_MONTH + i,to_year);
             }
-            distance += KNOW_WEEK_DAY;
         } else if(to_month==KNOWN_MONTH){
-            distance += KNOW_WEEK_DAY;
+            distance = 0;
         }else{
             for(int i = 1; i < KNOWN_MONTH - to_month + 1; ++i)
             {
                 distance-=howManyDay(KNOWN_MONTH - i,to_year);
             }
-            distance += KNOW_WEEK_DAY;
         }
     }  else if (to_year - KNOWN_YEAR < 0){
         for(int i = KNOWN_MONTH - 1; i > 0; --i){
@@ -85,330 +82,131 @@ int calculatelap(int to_month, int to_year)
         {
             distance-=howManyDay(12 - j,to_year);
         }
-        distance += KNOW_WEEK_DAY;
     }
     return distance; 
 }
 
 int determineTheFirstDayIsWhichWeekDay(int to_month, int to_year)
 {
-    int distance = calculatelap(to_month, to_year);
-    if(distance>=0)
-    {
-        return distance%7;
-    } else{
-        while(distance<0){
-            distance+=7;
-        }
-        return distance%7;
+    int distance = calculateDistance(to_month, to_year) + KNOW_WEEK_DAY;
+    while(distance<0){
+        distance+=7;
     }
+    return distance%7;
 }
-//
-void drawThreeMonths(int month_num, int year)
-{
-    int month_1_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeekDay(month_num,year);
-    int month_2_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeekDay(month_num+1,year);
-    int month_3_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeekDay(month_num+2,year);
-    int month_1_howManyDay = howManyDay(month_num,year);
-    int month_2_howManyDay = howManyDay(month_num+1,year);
-    int month_3_howManyDay = howManyDay(month_num+2,year);
-    int month_1_left;
-    int month_2_left;
-    int month_3_left;
-    
+
+void printMonths(int how_many_months_on_a_row, int month_num, int year){
     char month_string[][4]={"NAN","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
     char week_string[][3]={"Su","Mo","Tu","We","Th","Fr","Sa"};
     
-    //print year
-    printf("%41c%d%c\n\n",'[', year, ']');
-    
-    //print months
-    printf("%10c",' ');
-    printf(month_string[month_num]);
-    printf("%28c",' ');
-    printf(month_string[month_num+1]);
-    printf("%28c",' ');
-    printf(month_string[month_num+2]);
-    printf("\n");
-    
-    //print week days
-    for(int i = 0;i<21;++i)//7 days for 3 months
-    {
-        if(i == 6||i == 13)//last day
+    if(how_many_months_on_a_row == 3){
+        //print year
+        printf("%41c%d%c\n\n",'[', year, ']');
+
+        //print months
+        printf("%10c",' ');
+        printf(month_string[month_num]);
+        printf("%28c",' ');
+        printf(month_string[month_num+1]);
+        printf("%28c",' ');
+        printf(month_string[month_num+2]);
+        printf("\n");
+
+        //print week days
+        for(int i = 0;i<21;++i)//7 days for 3 months
         {
+            if(i == 6||i == 13)//last day
+            {
+                printf(week_string[i%7]);
+                printf("     ");
+            } else if(i == 20){//last day
+                printf(week_string[i%7]);
+                printf("\n");
+            }else {
             printf(week_string[i%7]);
-            printf("     ");
-        } else if(i == 20){//last day
-            printf(week_string[i%7]);
-            printf("\n");
-        }else {
-        printf(week_string[i%7]);
-        printf("--");
+            printf("--");
+            }
         }
-    }
-    
-    //print spacer '~'
-    for(int i = 0; i<88; ++i)
-    {
-        printf("~");
-    }
-    printf("\n");
 
-    //print date
-    for(int i = 0; i<23; ++i)//7 days for 3 weeks, and 2 spaces
-    {
-        if(i<=6)
+        //print spacer '~'
+        for(int i = 0; i<88; ++i)
         {
-            if(i >= month_1_FirstDay_WhichWeek)
-                printf("%-4d",i - month_1_FirstDay_WhichWeek + 1);
-            else
-                printf("%-4c",' ');
-            month_1_left = i - month_1_FirstDay_WhichWeek + 1;
-        } else if(i==7){
-            printf("   ");//space
-        } else if(i>=8&&i<=14){
-            if(i - 8 >= month_2_FirstDay_WhichWeek)
-                printf("%-4d",i - 8 - month_2_FirstDay_WhichWeek + 1);
-            else
-                printf("%-4c",' ');
-            month_2_left = i - 8 - month_2_FirstDay_WhichWeek + 1;
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22){
-            if(i - 16 >= month_3_FirstDay_WhichWeek)
-                printf("%-4d",i - 16 - month_3_FirstDay_WhichWeek + 1);
-            else
-                printf("%-4c",' ');
-            month_3_left = i - 16 - month_3_FirstDay_WhichWeek + 1;
+            printf("~");
         }
-    }
-    
-    printf("\n");
-    
-    for(int i = 0; i<23; ++i)
-    {
-        if(i<=6)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(i==7){
-            printf("   ");
-        } else if(i>=8&&i<=14){
-            ++month_2_left;
-            printf("%-4d",month_2_left);
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22){
-            ++month_3_left;
-            printf("%-4d",month_3_left);
-        }
-    }
-  
-    printf("\n");    
-    
-    for(int i = 0; i<23; ++i)
-    {
-        if(i<=6)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(i==7){
-            printf("   ");
-        } else if(i>=8&&i<=14){
-            ++month_2_left;
-            printf("%-4d",month_2_left);
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22){
-            ++month_3_left;
-            printf("%-4d",month_3_left);
-        }
-    }
-    
-    printf("\n");
+        printf("\n");        
+    } else if(how_many_months_on_a_row == 1){
+        //print year
+        printf("%9c",' ');
+        printf("%c%d%c\n\n",'[', year, ']');
 
-    for(int i = 0; i<23; ++i)
-    {
-        if(i<=6)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(i==7){
-            printf("   ");
-        } else if(i>=8&&i<=14){
-            ++month_2_left;
-            printf("%-4d",month_2_left);
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22){
-            ++month_3_left;
-            printf("%-4d",month_3_left);
-        }
-    }
-    
-    printf("\n");
-    
-    for(int i = 0; i<23; ++i)
-    {
-        if(i<=6 && month_1_left <month_1_howManyDay)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(i<=6 && month_1_left >= month_1_howManyDay){
-            printf("%-4c",' ');
-        }else if(i==7){
-            printf("   ");
-        } else if(i>=8&&i<=14 && month_2_left < month_2_howManyDay){
-            ++month_2_left;
-            printf("%-4d",month_2_left);
-        } else if(i>=8&&i<=14 && month_2_left >= month_2_howManyDay){
-            printf("%-4c",' ');
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22 && month_3_left < month_3_howManyDay){
-            ++month_3_left;
-            printf("%-4d",month_3_left);
-        } else if(i>=16&&i<=22 && month_3_left >= month_3_howManyDay){
-            printf("%-4c",' ');
-        }
-    }
+        //print month
+        printf("%10c",' ');
+        printf(month_string[month_num]);
+        printf("\n");
 
-    printf("\n");
-
-    for(int i = 0; i<23; ++i)
-    {
-        if(i<=6 && month_1_left <month_1_howManyDay)
+        //print week days
+        for(int i = 0;i<7;++i)
         {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(i<=6 && month_1_left >= month_1_howManyDay){
-            printf("%-4c",' ');
-        }else if(i==7){
-            printf("   ");
-        } else if(i>=8&&i<=14 && month_2_left < month_2_howManyDay){
-            ++month_2_left;
-            printf("%-4d",month_2_left);
-        } else if(i>=8&&i<=14 && month_2_left >= month_2_howManyDay){
-            printf("%-4c",' ');
-        } else if(i==15){
-            printf("   ");
-        } else if(i>=16&&i<=22 && month_3_left < month_3_howManyDay){
-            ++month_3_left;
-            printf("%-4d",month_3_left);
-        } else if(i>=16&&i<=22 && month_3_left >= month_3_howManyDay){
-            printf("%-4c",' ');
+            if(i == 6)
+            {
+                printf(week_string[i]);
+            } else{
+                printf(week_string[i]);
+                printf("--"); 
+            }  
         }
+        printf("\n");
+
+        //print spacer '~'
+        for(int i = 0; i<26; ++i)
+        {
+            printf("~");
+        }
+        printf("\n");
     }
-    
-    printf("\n");
-    
-    printf("%s\n","press 'a' or 'd' to roll");
-    printf("%s\n","press 'q' to change mode");      
+    int firstday_is_whichweek[3];//不可以直接花括号//c语言，栈必须确认分配大小
+    firstday_is_whichweek[0] = determineTheFirstDayIsWhichWeekDay(month_num,year);
+    firstday_is_whichweek[1] = determineTheFirstDayIsWhichWeekDay(month_num+1,year);
+    firstday_is_whichweek[2] = determineTheFirstDayIsWhichWeekDay(month_num+2,year);
+    int howmany_day[3];
+    howmany_day[0] = howManyDay(month_num,year);
+    howmany_day[1] = howManyDay(month_num+1,year);
+    howmany_day[2] = howManyDay(month_num+2,year);
+    int leftday[3];
+    for(int row = 0; row<6; ++row){//6 rows
+        for(int m = 0; m<how_many_months_on_a_row; ++m){
+            for(int d = 0; d<7; ++d){//7 days
+                if(row == 0){
+                    if(d >= firstday_is_whichweek[m])
+                        printf("%-4d",d - firstday_is_whichweek[m] + 1);
+                    else
+                        printf("%-4c",' ');  
+                    leftday[m] = d - firstday_is_whichweek[m] + 1;
+                } else{
+                    if(leftday[m] <howmany_day[m])
+                    {
+                        ++leftday[m];
+                        printf("%-4d",leftday[m]);
+                    } else{
+                        printf("%-4c",' ');     
+                    }
+                }
+            }
+            if (m < how_many_months_on_a_row-1)
+                printf("   ");
+        }
+        printf("\n");
+    }
+    if(how_many_months_on_a_row == 3){
+        printf("%s\n","press 'a' or 'd' to roll");
+        printf("%s\n","press 'w' to change mode");        
+    }else if(how_many_months_on_a_row == 1){
+        printf("%s\n","press 's' to search");
+        printf("%s\n","press 'w' to change mode");        
+    }
 }
 
-void drawOneMonth(int month_num, int year)
-{
-    int month_1_FirstDay_WhichWeek = determineTheFirstDayIsWhichWeekDay(month_num,year);
-    int month_1_howManyDay = howManyDay(month_num,year);
-    int month_1_left;
-    
-    char month_string[][4]={"NAN","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-    char week_string[][3]={"Su","Mo","Tu","We","Th","Fr","Sa"};
-    
-    //print year
-    printf("%9c",' ');
-    printf("%c%d%c\n\n",'[', year, ']');
-    
-    //print month
-    printf("%10c",' ');
-    printf(month_string[month_num]);
-    printf("\n");
-    
-    //print week days
-    for(int i = 0;i<7;++i)
-    {
-        if(i == 6)
-        {
-            printf(week_string[i]);
-        } else{
-            printf(week_string[i]);
-            printf("--"); 
-        }  
-    }
-    printf("\n");
-        
-    //print spacer '~'
-    for(int i = 0; i<26; ++i)
-    {
-        printf("~");
-    }
-    printf("\n");
-
-    //print date
-    for(int i = 0; i<7; ++i)
-    {
-        if(i >= month_1_FirstDay_WhichWeek)
-            printf("%-4d",i - month_1_FirstDay_WhichWeek + 1);
-        else
-            printf("%-4c",' ');
-        month_1_left = i - month_1_FirstDay_WhichWeek + 1;
-    }
-    
-    printf("\n");
-    
-    for(int i = 0; i<7; ++i)
-    {
-        ++month_1_left;
-        printf("%-4d",month_1_left);
-    }
-  
-    printf("\n");    
-    
-    for(int i = 0; i<7; ++i)
-    {
-        ++month_1_left;
-        printf("%-4d",month_1_left);
-    }
-    
-    printf("\n");
-
-    for(int i = 0; i<7; ++i)
-    {
-        ++month_1_left;
-        printf("%-4d",month_1_left);
-    }
-    
-    printf("\n");
-    
-    for(int i = 0; i<7; ++i)
-    {
-        if(month_1_left <month_1_howManyDay)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(month_1_left >= month_1_howManyDay){
-            printf("%-4c",' ');
-        }
-    }
-
-    printf("\n");
-
-    for(int i = 0; i<7; ++i)
-    {
-        if(month_1_left <month_1_howManyDay)
-        {
-            ++month_1_left;
-            printf("%-4d",month_1_left);
-        } else if(month_1_left >= month_1_howManyDay){
-            printf("%-4c",' ');
-        }
-    }
-    
-    printf("\n");
-    
-    printf("%s\n","press 's' to search");
-    printf("%s\n","press 'q' to change mode");    
-}
+void keyboardEvent_search();    
 void keyboardEvent_roll(int month_num, int year)
 {  
     while(1)
@@ -420,12 +218,12 @@ void keyboardEvent_roll(int month_num, int year)
                 {
                     month_num+=3;                  
                     system("cls");
-                    drawThreeMonths(month_num, year);
+                    printMonths(3,month_num, year);
                 }else {
                     month_num = 1;
                     year+=1;
                     system("cls");
-                    drawThreeMonths(month_num, year);
+                    printMonths(3,month_num, year);
                 }
 		break;
             case 'a':
@@ -433,22 +231,22 @@ void keyboardEvent_roll(int month_num, int year)
                 {
                     month_num-=3;
                     system("cls");
-                    drawThreeMonths(month_num, year);
+                    printMonths(3,month_num, year);
                 }else {
                     month_num = 10;
                     year-=1;
                     system("cls");
-                    drawThreeMonths(month_num, year);
+                    printMonths(3,month_num, year);
                 } 
                 break;
-            case 'q':
+            case 'w':
                 keyboardEvent_search();
                 break;
 	}
     }
 }
 
-void keyboardEvent_search(int month_num, int year)
+void keyboardEvent_search()
 {
     int year_search;
     int month_search;    
@@ -465,9 +263,9 @@ void keyboardEvent_search(int month_num, int year)
                 printf("please enter month: ");
                 scanf("%d", &month_search);   
                 system("cls");
-                drawOneMonth(month_search, year_search);
+                printMonths(1,month_search, year_search);
 		break;
-            case 'q':
+            case 'w':
                 while((month_search-1)%3 != 0){
                     ++month_search;
                 }
@@ -476,7 +274,7 @@ void keyboardEvent_search(int month_num, int year)
                     month_search = 10;
                 }
                 system("cls");
-                drawThreeMonths(month_search, year_search);
+                printMonths(3,month_search, year_search);
                 keyboardEvent_roll(month_search, year_search);
                 break;                
 	}
@@ -485,7 +283,7 @@ void keyboardEvent_search(int month_num, int year)
 
 int main()
 {
-    drawThreeMonths(KNOWN_MONTH, KNOWN_YEAR);
+    printMonths(3,KNOWN_MONTH, KNOWN_YEAR);
     keyboardEvent_roll(KNOWN_MONTH, KNOWN_YEAR);
     return 0;
 }
